@@ -1,7 +1,7 @@
-# url-mapper
+# Go URL Mapper
 
-Package mapping query string to struct using reflection.
-Mapper supports optional validation of input values through tags.
+Package mapping query string to struct using reflection and tags.
+Support for optional validation of input values.
 
 Example:
 
