@@ -16,13 +16,14 @@ package mapper
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"reflect"
 )
 
 var (
-	sliceOfBytes = reflect.TypeOf([]byte(nil))
-	errWrongType = errors.New("Unmarshal only works with pointers")
+	errWrongType        = errors.New("Unmarshal only works with pointers")
+	errValidationFailed = errors.New("Field invalid")
 )
 
 func Unmarshal(path string, v interface{}) error {
@@ -47,7 +48,6 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		sf := typ.Field(i)
 		if sf.PkgPath != "" && !sf.Anonymous {
 			// unexported
-			//fmt.Println("unexported")
 			continue
 		}
 
@@ -143,12 +143,16 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		//	continue
 		//}
 
+		fmt.Println(fmt.Sprintf("%v=", sv.String()))
+
+		// TODO: validation
+		if !isValid(sv, opts) {
+			return errValidationFailed
+		}
+
 		if sv.IsValid() && sv.CanSet() {
 			if sv.Kind() == reflect.String {
-				//sv.SetString(valueString(sv, opts))
-
-				//fmt.Println("newVal=" + values.Get(name))
-				sv.SetString(values.Get(name))
+				//sv.SetString(valueString(values.Get(name), opts))
 			}
 		}
 	}
