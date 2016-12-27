@@ -1,6 +1,6 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 
-package lib
+package mapper
 
 import (
 	"strings"
@@ -16,11 +16,17 @@ func (tag TagOptions) Contains(tagName string) bool {
 	return false
 }
 
-// parseTagIntoMap parses a struct tag `valid:required~Some error message,length(2|3)` into map[string]string{"required": "Some error message", "length(2|3)": ""}
-func ParseTagsIntoMap(tag string) TagOptions {
+func ParseTagsIntoMap(tag string) (string, TagOptions) {
 	optionsMap := make(TagOptions)
+	name := ""
+
 	options := strings.SplitN(tag, ",", -1)
-	for _, option := range options {
+	for i, option := range options {
+		if i == 0 {
+			name = option
+			continue
+		}
+
 		validationOptions := strings.Split(option, "=")
 		if !isValidTag(validationOptions[0]) {
 			continue
@@ -32,7 +38,7 @@ func ParseTagsIntoMap(tag string) TagOptions {
 			optionsMap[validationOptions[0]] = ""
 		}
 	}
-	return optionsMap
+	return name, optionsMap
 }
 
 func isValidTag(s string) bool {

@@ -16,7 +16,6 @@ package mapper
 
 import (
 	"errors"
-	"fmt"
 	"net/url"
 	"reflect"
 )
@@ -41,40 +40,35 @@ func Unmarshal(path string, v interface{}) error {
 }
 
 func mapToStruct(values url.Values, v reflect.Value) error {
-	var embedded []reflect.Value
+	//var embedded []reflect.Value
 
-	typ := v.Type()
-	for i := 0; i < typ.NumField(); i++ {
-		sf := typ.Field(i)
-		if sf.PkgPath != "" && !sf.Anonymous {
+	mapToType := v.Type() // must be struct
+	for i := 0; i < mapToType.NumField(); i++ {
+		mapToField := mapToType.Field(i)
+		if mapToField.PkgPath != "" && !mapToField.Anonymous {
 			// unexported
 			continue
 		}
 
-		sv := v.Field(i)
+		mapToValue := v.Field(i)
 
-		//fmt.Println(sv)
-
-		tag := sf.Tag.Get("query")
+		tag := mapToField.Tag.Get("query")
 		if tag == "-" {
 			continue
 		}
 
-		name, opts := parseTag(tag)
-		if name == "" {
-			if sf.Anonymous && sv.Kind() == reflect.Struct {
-				// save embedded struct for later processing
-				embedded = append(embedded, sv)
-				continue
-			}
+		name, opts := ParseTagsIntoMap(tag)
+		//if opts == emptyTags {
+		//	if mapToField.Anonymous && mapToValue.Kind() == reflect.Struct {
+		//		// save embedded struct for later processing
+		//		embedded = append(embedded, mapToValue)
+		//		continue
+		//	}
+		//
+		//	name = sf.Name
+		//}
 
-			name = sf.Name
-		}
-
-		//fmt.Println(name)
-		//fmt.Println(opts)
-
-		if opts.Contains("omitempty") && isEmptyValue(sv) {
+		if opts.Contains("omitempty") && isEmptyValue(mapToValue) {
 			continue
 		}
 
@@ -143,16 +137,16 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		//	continue
 		//}
 
-		fmt.Println(fmt.Sprintf("%v=", sv.String()))
+		//fmt.Println(fmt.Sprintf("%v=", sv.String()))
 
 		// TODO: validation
-		if !isValid(sv, opts) {
-			return errValidationFailed
-		}
+		//if !isValid(sv, opts) {
+		//	return errValidationFailed
+		//}
 
-		if sv.IsValid() && sv.CanSet() {
-			if sv.Kind() == reflect.String {
-				//sv.SetString(valueString(values.Get(name), opts))
+		if mapToValue.IsValid() && mapToValue.CanSet() {
+			if mapToValue.Kind() == reflect.String {
+				mapToValue.SetString(values.Get(name))
 			}
 		}
 	}

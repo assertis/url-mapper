@@ -1,7 +1,7 @@
 package mapper_test
 
 import (
-	"github.com/assertis/url-mapper/mapper"
+	"github.com/assertis/url-mapper"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,14 +18,14 @@ type TestRequest struct {
 //		true,
 //		[]interface{}{},
 //	} {
-//		assert.NotNil(t, mapper.Unmarshal(testType, getTestStruct()))
+//		assert.NotNil(t, lib.Unmarshal(testType, getTestStruct()))
 //	}
 //
 //	for _, testType := range []interface{}{
-//		"mapper",
-//		[]byte("mapper"),
+//		"lib",
+//		[]byte("lib"),
 //	} {
-//		assert.Nil(t, mapper.Unmarshal(testType, getTestStruct()))
+//		assert.Nil(t, lib.Unmarshal(testType, getTestStruct()))
 //	}
 //}
 
@@ -36,4 +36,5 @@ func TestMappingStrings(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "TBW", str.Origin)
+	assert.Equal(t, "LBG", str.Destination)
 }

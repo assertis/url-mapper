@@ -1,4 +1,4 @@
-package lib
+package mapper
 
 import (
 	"fmt"
