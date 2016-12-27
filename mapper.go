@@ -26,18 +26,13 @@ var (
 	errWrongType = errors.New("Unmarshal only works with pointers")
 )
 
-func Unmarshal(path string, v interface{}) error {
+func Unmarshal(path url.Values, v interface{}) error {
 	val := reflect.ValueOf(v)
 	if val.Kind() != reflect.Ptr {
 		return errWrongType
 	}
 
-	values, err := url.ParseQuery(path)
-	if err != nil {
-		return err
-	}
-
-	return mapToStruct(values, val.Elem())
+	return mapToStruct(path, val.Elem())
 }
 
 func mapToStruct(values url.Values, v reflect.Value) error {
@@ -97,15 +92,15 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 				continue
 			}
 
-			if mapToValue.Kind() == reflect.Int {
+			switch mapToValue.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				i, err := strconv.Atoi(values.Get(name))
 				if err != nil {
 					return err
 				}
 				mapToValue.SetInt(int64(i))
-			}
 
-			if mapToValue.Kind() == reflect.String {
+			case reflect.String:
 				mapToValue.SetString(values.Get(name))
 			}
 
