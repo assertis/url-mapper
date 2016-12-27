@@ -1,4 +1,4 @@
-package mapper
+package lib
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 var timeType = reflect.TypeOf(time.Time{})
 
 // valueString returns the string representation of a value.
-func valueString(v reflect.Value, opts tagOptions) string {
+func valueString(v reflect.Value, opts TagOptions) string {
 	for v.Kind() == reflect.Ptr {
 		if v.IsNil() {
 			return ""

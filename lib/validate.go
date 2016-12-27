@@ -1,11 +1,11 @@
-package mapper
+package lib
 
 import (
 	"fmt"
 	"reflect"
 )
 
-func isValid(v reflect.Value, opts tagOptions) bool {
+func isValid(v reflect.Value, opts TagOptions) bool {
 	fmt.Println(v.Kind())
 	fmt.Println(opts)
 	fmt.Println(opts.Contains("regexp"))
