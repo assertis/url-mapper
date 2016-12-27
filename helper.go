@@ -1,40 +1,13 @@
 package mapper
 
 import (
-	"fmt"
 	"reflect"
-	"strconv"
 	"time"
 )
 
-var timeType = reflect.TypeOf(time.Time{})
-
-// valueString returns the string representation of a value.
-func valueString(v reflect.Value, opts TagOptions) string {
-	for v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return ""
-		}
-		v = v.Elem()
-	}
-
-	if v.Kind() == reflect.Bool && opts.Contains("int") {
-		if v.Bool() {
-			return "1"
-		}
-		return "0"
-	}
-
-	if v.Type() == timeType {
-		t := v.Interface().(time.Time)
-		if opts.Contains("unix") {
-			return strconv.FormatInt(t.Unix(), 10)
-		}
-		return t.Format(time.RFC3339)
-	}
-
-	return fmt.Sprint(v.Interface())
-}
+var (
+	timeType = reflect.TypeOf(time.Time{})
+)
 
 // isEmptyValue checks if a value should be considered empty for the purposes
 // of omitting fields with the "omitempty" option.

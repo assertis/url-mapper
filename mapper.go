@@ -8,7 +8,7 @@
 //		Adults int `query:"adults,default=1,max=9"`
 // 		Children int `query:"children,optional,default=0,max=9"`
 //		Outward time.Time `query:"outward,dateFormat=RFC_3339"`
-//		Return *time.Time `query:"return,optional,dateFormat=RFC_3339"`
+//		Return time.Time `query:"inward,optional,dateFormat=RFC_3339"`
 //	}
 //
 
@@ -18,11 +18,12 @@ import (
 	"errors"
 	"net/url"
 	"reflect"
+	"strconv"
+	"time"
 )
 
 var (
-	errWrongType        = errors.New("Unmarshal only works with pointers")
-	errValidationFailed = errors.New("Field invalid")
+	errWrongType = errors.New("Unmarshal only works with pointers")
 )
 
 func Unmarshal(path string, v interface{}) error {
@@ -43,8 +44,9 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 	mapToType := v.Type() // must be struct
 	for i := 0; i < mapToType.NumField(); i++ {
 		mapToField := mapToType.Field(i)
+
+		// Ignore unexported fields
 		if mapToField.PkgPath != "" && !mapToField.Anonymous {
-			// unexported
 			continue
 		}
 
@@ -61,11 +63,6 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 			continue
 		}
 
-		//if mapToValue.Type() == timeType {
-		//	values.Add(name, valueString(values.Get(name), opts))
-		//	continue
-		//}
-
 		for mapToValue.Kind() == reflect.Ptr {
 			if mapToValue.IsNil() {
 				break
@@ -73,10 +70,10 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 			mapToValue = mapToValue.Elem()
 		}
 
-		if mapToValue.Kind() == reflect.Struct {
-			mapToStruct(values, mapToValue)
-			continue
-		}
+		//if mapToValue.Kind() == reflect.Struct {
+		//	mapToStruct(values, mapToValue)
+		//	continue
+		//}
 
 		// TODO: validation
 		//if !isValid(sv, opts) {
@@ -84,9 +81,34 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		//}
 
 		if mapToValue.IsValid() && mapToValue.CanSet() {
+			// Time?
+			if mapToValue.Type() == reflect.TypeOf(time.Time{}) {
+				if values.Get(name) == "" {
+					continue
+				}
+
+				i, err := strconv.Atoi(values.Get(name))
+				if err != nil {
+					return err
+				}
+				t := time.Unix(int64(i), 0)
+				mapToValue.Set(reflect.ValueOf(t))
+
+				continue
+			}
+
+			if mapToValue.Kind() == reflect.Int {
+				i, err := strconv.Atoi(values.Get(name))
+				if err != nil {
+					return err
+				}
+				mapToValue.SetInt(int64(i))
+			}
+
 			if mapToValue.Kind() == reflect.String {
 				mapToValue.SetString(values.Get(name))
 			}
+
 		}
 	}
 
