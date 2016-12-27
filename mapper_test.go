@@ -11,24 +11,6 @@ type TestRequest struct {
 	Destination string `query:"destination"`
 }
 
-//func TestUnmarshalInputTypes(t *testing.T) {
-//	for _, testType := range []interface{}{
-//		0,
-//		0.0,
-//		true,
-//		[]interface{}{},
-//	} {
-//		assert.NotNil(t, lib.Unmarshal(testType, getTestStruct()))
-//	}
-//
-//	for _, testType := range []interface{}{
-//		"lib",
-//		[]byte("lib"),
-//	} {
-//		assert.Nil(t, lib.Unmarshal(testType, getTestStruct()))
-//	}
-//}
-
 func TestMappingStrings(t *testing.T) {
 	var str = TestRequest{}
 

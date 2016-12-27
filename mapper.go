@@ -40,8 +40,6 @@ func Unmarshal(path string, v interface{}) error {
 }
 
 func mapToStruct(values url.Values, v reflect.Value) error {
-	//var embedded []reflect.Value
-
 	mapToType := v.Type() // must be struct
 	for i := 0; i < mapToType.NumField(); i++ {
 		mapToField := mapToType.Field(i)
@@ -58,86 +56,27 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		}
 
 		name, opts := ParseTagsIntoMap(tag)
-		//if opts == emptyTags {
-		//	if mapToField.Anonymous && mapToValue.Kind() == reflect.Struct {
-		//		// save embedded struct for later processing
-		//		embedded = append(embedded, mapToValue)
-		//		continue
-		//	}
-		//
-		//	name = sf.Name
-		//}
 
 		if opts.Contains("omitempty") && isEmptyValue(mapToValue) {
 			continue
 		}
 
-		//if sv.Type().Implements(encoderType) {
-		//	if !reflect.Indirect(sv).IsValid() {
-		//		sv = reflect.New(sv.Type().Elem())
-		//	}
-		//
-		//	m := sv.Interface().(Encoder)
-		//	if err := m.EncodeValues(name, &values); err != nil {
-		//		return err
-		//	}
+		//if mapToValue.Type() == timeType {
+		//	values.Add(name, valueString(values.Get(name), opts))
 		//	continue
 		//}
 
-		//if sv.Kind() == reflect.Slice || sv.Kind() == reflect.Array {
-		//	var del byte
-		//	if opts.Contains("comma") {
-		//		del = ','
-		//	} else if opts.Contains("space") {
-		//		del = ' '
-		//	} else if opts.Contains("semicolon") {
-		//		del = ';'
-		//	} else if opts.Contains("brackets") {
-		//		name = name + "[]"
-		//	}
-		//
-		//	if del != 0 {
-		//		s := new(bytes.Buffer)
-		//		first := true
-		//		for i := 0; i < sv.Len(); i++ {
-		//			if first {
-		//				first = false
-		//			} else {
-		//				s.WriteByte(del)
-		//			}
-		//			s.WriteString(valueString(sv.Index(i), opts))
-		//		}
-		//		values.Add(name, s.String())
-		//	} else {
-		//		for i := 0; i < sv.Len(); i++ {
-		//			k := name
-		//			if opts.Contains("numbered") {
-		//				k = fmt.Sprintf("%s%d", name, i)
-		//			}
-		//			values.Add(k, valueString(sv.Index(i), opts))
-		//		}
-		//	}
-		//	continue
-		//}
+		for mapToValue.Kind() == reflect.Ptr {
+			if mapToValue.IsNil() {
+				break
+			}
+			mapToValue = mapToValue.Elem()
+		}
 
-		//if sv.Type() == timeType {
-		//	values.Add(name, valueString(sv, opts))
-		//	continue
-		//}
-
-		//for sv.Kind() == reflect.Ptr {
-		//	if sv.IsNil() {
-		//		break
-		//	}
-		//	sv = sv.Elem()
-		//}
-
-		//if sv.Kind() == reflect.Struct {
-		//	mapToStruct(values, sv)
-		//	continue
-		//}
-
-		//fmt.Println(fmt.Sprintf("%v=", sv.String()))
+		if mapToValue.Kind() == reflect.Struct {
+			mapToStruct(values, mapToValue)
+			continue
+		}
 
 		// TODO: validation
 		//if !isValid(sv, opts) {
@@ -150,12 +89,6 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 			}
 		}
 	}
-
-	//for _, f := range embedded {
-	//	if err := reflectValue(values, f, scope); err != nil {
-	//		return err
-	//	}
-	//}
 
 	return nil
 }
