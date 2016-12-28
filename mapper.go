@@ -3,12 +3,11 @@
 //
 // Example:
 // 	type Request struct {
-// 		Origin string `query:"origin,regexp=^[A-Z]{3}$"`
-//		Destination string `query:"destination,regexp=^[A-Z]{3}$"`
-//		Adults int `query:"adults,default=1,max=9"`
-// 		Children int `query:"children,optional,default=0,max=9"`
-//		Outward time.Time `query:"outward,dateFormat=RFC_3339"`
-//		Return time.Time `query:"inward,optional,dateFormat=RFC_3339"`
+// 		Origin string `query:"origin"`
+//		Destination string `query:"destination"`
+//		NumOfPassengers int `query:"adults"`
+//		OutwardDate time.Time `query:"outward"`
+//		ReturnDate time.Time `query:"inward,omitempty"`
 //	}
 //
 
@@ -52,7 +51,7 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 			continue
 		}
 
-		name, opts := ParseTagsIntoMap(tag)
+		name, opts := TagOptionsFromString(tag)
 
 		if opts.Contains("omitempty") && isEmptyValue(mapToValue) {
 			continue
@@ -64,16 +63,6 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 			}
 			mapToValue = mapToValue.Elem()
 		}
-
-		//if mapToValue.Kind() == reflect.Struct {
-		//	mapToStruct(values, mapToValue)
-		//	continue
-		//}
-
-		// TODO: validation
-		//if !isValid(sv, opts) {
-		//	return errValidationFailed
-		//}
 
 		if mapToValue.IsValid() && mapToValue.CanSet() {
 			// Time?

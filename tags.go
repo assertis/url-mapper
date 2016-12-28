@@ -9,15 +9,8 @@ import (
 
 type TagOptions map[string]string
 
-func (tag TagOptions) Contains(tagName string) bool {
-	if _, ok := tag[tagName]; ok {
-		return true
-	}
-	return false
-}
-
-func ParseTagsIntoMap(tag string) (string, TagOptions) {
-	optionsMap := make(TagOptions)
+func TagOptionsFromString(tag string) (string, TagOptions) {
+	tagMap := make(TagOptions)
 	name := ""
 
 	options := strings.SplitN(tag, ",", -1)
@@ -33,12 +26,19 @@ func ParseTagsIntoMap(tag string) (string, TagOptions) {
 		}
 
 		if len(validationOptions) == 2 {
-			optionsMap[validationOptions[0]] = validationOptions[1]
+			tagMap[validationOptions[0]] = validationOptions[1]
 		} else {
-			optionsMap[validationOptions[0]] = ""
+			tagMap[validationOptions[0]] = ""
 		}
 	}
-	return name, optionsMap
+	return name, tagMap
+}
+
+func (tag TagOptions) Contains(tagName string) bool {
+	if _, ok := tag[tagName]; ok {
+		return true
+	}
+	return false
 }
 
 func isValidTag(s string) bool {

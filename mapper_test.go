@@ -1,7 +1,6 @@
 package mapper_test
 
 import (
-	"github.com/assertis/proxtasy/jp/atomised"
 	"github.com/assertis/url-mapper"
 	"github.com/stretchr/testify/assert"
 	"net/url"
@@ -9,17 +8,24 @@ import (
 	"time"
 )
 
-func TestMappingStrings(t *testing.T) {
-	var str = atomised.SearchRequest{}
+type TestRequest struct {
+	Origin          string    `query:"o"`
+	Destination     string    `query:"d"`
+	NumOfPassengers int       `query:"pax"`
+	OutwardDate     time.Time `query:"outward_date"`
+	ReturnDate      time.Time `query:"return_date,omitempty"`
+}
 
-	values, _ := url.ParseQuery("origin=TBW&destination=LBG&adults=1&children=0&outward=1482852746")
-	err := mapper.Unmarshal(values, &str)
+func TestMappingStrings(t *testing.T) {
+	var r = TestRequest{}
+
+	values, _ := url.ParseQuery("o=TBW&d=LBG&pax=1&outward_date=1482852746")
+	err := mapper.Unmarshal(values, &r)
 
 	assert.Nil(t, err)
-	assert.Equal(t, "TBW", str.Origin)
-	assert.Equal(t, "LBG", str.Destination)
-	assert.Equal(t, time.Unix(1482852746, 0), str.Outward)
-	assert.Equal(t, time.Time{}, str.Inward)
-	assert.Equal(t, int64(1), str.Adults)
-	assert.Equal(t, int64(0), str.Children)
+	assert.Equal(t, "TBW", r.Origin)
+	assert.Equal(t, "LBG", r.Destination)
+	assert.Equal(t, time.Unix(1482852746, 0), r.OutwardDate)
+	assert.Equal(t, time.Time{}, r.ReturnDate)
+	assert.Equal(t, 1, r.NumOfPassengers)
 }
