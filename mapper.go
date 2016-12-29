@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"strconv"
 	"time"
+	"github.com/yezooz/govalidator"
 )
 
 var (
@@ -65,32 +66,43 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		}
 
 		if mapToValue.IsValid() && mapToValue.CanSet() {
+			value := values.Get(name)
+
 			// Time?
 			if mapToValue.Type() == reflect.TypeOf(time.Time{}) {
 				if values.Get(name) == "" {
 					continue
 				}
 
-				i, err := strconv.Atoi(values.Get(name))
-				if err != nil {
-					return err
+				if opts.Contains("rfc3339") && govalidator.IsRFC3339(value) {
+					t, err := time.Parse(time.RFC3339, value)
+					if err != nil {
+						return err
+					}
+					mapToValue.Set(reflect.ValueOf(t))
+				} else if opts.Contains("unix") && govalidator.IsInt(value) {
+					i, _ := strconv.Atoi(value)
+
+					t := time.Unix(int64(i), 0)
+					mapToValue.Set(reflect.ValueOf(t))
+				} else {
+					return errors.New("Incorrect time value")
 				}
-				t := time.Unix(int64(i), 0)
-				mapToValue.Set(reflect.ValueOf(t))
+
 
 				continue
 			}
 
 			switch mapToValue.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				i, err := strconv.Atoi(values.Get(name))
+				i, err := strconv.Atoi(value)
 				if err != nil {
 					return err
 				}
 				mapToValue.SetInt(int64(i))
 
 			case reflect.String:
-				mapToValue.SetString(values.Get(name))
+				mapToValue.SetString(value)
 			}
 
 		}
