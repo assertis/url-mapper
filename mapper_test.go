@@ -12,8 +12,8 @@ type TestRequest struct {
 	Origin          string    `query:"o"`
 	Destination     string    `query:"d"`
 	NumOfPassengers int       `query:"pax"`
-	OutwardDate     time.Time `query:"outward_date,rfc3339"`
-	ReturnDate      time.Time `query:"return_date,unix"`
+	OutwardDate     time.Time `query:"outward_date,unix"`
+	ReturnDate      time.Time `query:"return_date,rfc3339"`
 }
 
 func TestMappingStrings(t *testing.T) {
