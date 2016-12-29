@@ -15,11 +15,11 @@ package mapper
 
 import (
 	"errors"
+	"github.com/yezooz/govalidator"
 	"net/url"
 	"reflect"
 	"strconv"
 	"time"
-	"github.com/yezooz/govalidator"
 )
 
 var (
@@ -89,7 +89,6 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 					return errors.New("Incorrect time value")
 				}
 
-
 				continue
 			}
 
@@ -100,11 +99,30 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 					return err
 				}
 				mapToValue.SetInt(int64(i))
-
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				i, err := strconv.Atoi(value)
+				if err != nil {
+					return err
+				}
+				if i < 0 {
+					return errors.New("Negative values not supported for uint field")
+				}
+				mapToValue.SetUint(uint64(i))
+			case reflect.Bool:
+				if value == "1" {
+					mapToValue.SetBool(true)
+				} else {
+					mapToValue.SetBool(false)
+				}
 			case reflect.String:
 				mapToValue.SetString(value)
+			case reflect.Slice, reflect.Array:
+				if len(values[name]) == 0 {
+					mapToValue.Set(reflect.MakeSlice(mapToValue.Type(), 0, 0))
+				} else {
+					mapToValue.Set(reflect.ValueOf(values[name]))
+				}
 			}
-
 		}
 	}
 
