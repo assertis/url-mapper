@@ -1,6 +1,6 @@
-# Go URL Mapper
+# Go URL Mapper [![Build Status](https://travis-ci.org/assertis/url-mapper.svg?branch=master)](https://travis-ci.org/assertis/url-mapper)
 
-Package mapping query string to struct using reflection and tags
+Package mapping query string to struct using reflection and tags.
 
 Example:
 
