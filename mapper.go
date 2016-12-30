@@ -23,13 +23,16 @@ import (
 )
 
 var (
-	errWrongType = errors.New("Unmarshal only works with pointers")
+	errWrongUnmarshalType = errors.New("Unmarshal only works with pointers")
+	errWrongIntType       = errors.New("Provided value is not an integer")
+	errWrongTimeType      = errors.New("Provided value is not a time")
+	errOnlyPositiveInt    = errors.New("Negative values are not supported")
 )
 
 func Unmarshal(path url.Values, v interface{}) error {
 	val := reflect.ValueOf(v)
 	if val.Kind() != reflect.Ptr {
-		return errWrongType
+		return errWrongUnmarshalType
 	}
 
 	return mapToStruct(path, val.Elem())
@@ -86,7 +89,7 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 					t := time.Unix(int64(i), 0)
 					mapToValue.Set(reflect.ValueOf(t))
 				} else {
-					return errors.New("Incorrect time value")
+					return errWrongTimeType
 				}
 
 				continue
@@ -94,18 +97,26 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 
 			switch mapToValue.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				if !govalidator.IsInt(value) {
+					return errWrongIntType
+				}
+
 				i, err := strconv.Atoi(value)
 				if err != nil {
 					return err
 				}
 				mapToValue.SetInt(int64(i))
 			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				if !govalidator.IsInt(value) {
+					return errWrongIntType
+				}
+
 				i, err := strconv.Atoi(value)
 				if err != nil {
 					return err
 				}
 				if i < 0 {
-					return errors.New("Negative values not supported for uint field")
+					return errOnlyPositiveInt
 				}
 				mapToValue.SetUint(uint64(i))
 			case reflect.Bool:
