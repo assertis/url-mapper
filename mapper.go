@@ -15,6 +15,7 @@ package mapper
 
 import (
 	"errors"
+	"fmt"
 	"github.com/yezooz/govalidator"
 	"net/url"
 	"reflect"
@@ -24,9 +25,9 @@ import (
 
 var (
 	errWrongUnmarshalType = errors.New("Unmarshal only works with pointers")
-	errWrongIntType       = errors.New("Provided value is not an integer")
-	errWrongTimeType      = errors.New("Provided value is not a time")
-	errOnlyPositiveInt    = errors.New("Negative values are not supported")
+	wrongIntType          = "Provided value `%s` for field `%s` is not an integer"
+	wrongTimeType         = "Provided value `%s` for field `%s` is not compatible with time or no format was provided"
+	onlyPositiveInt       = "Negative value `%s` for field `%s` is not supported"
 )
 
 func Unmarshal(path url.Values, v interface{}) error {
@@ -89,7 +90,7 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 					t := time.Unix(int64(i), 0)
 					mapToValue.Set(reflect.ValueOf(t))
 				} else {
-					return errWrongTimeType
+					return errors.New(fmt.Sprintf(wrongTimeType, value, mapToField.Name))
 				}
 
 				continue
@@ -98,7 +99,7 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 			switch mapToValue.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				if !govalidator.IsInt(value) {
-					return errWrongIntType
+					return errors.New(fmt.Sprintf(wrongIntType, value, mapToField.Name))
 				}
 
 				i, err := strconv.Atoi(value)
@@ -108,7 +109,7 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 				mapToValue.SetInt(int64(i))
 			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 				if !govalidator.IsInt(value) {
-					return errWrongIntType
+					return errors.New(fmt.Sprintf(wrongIntType, value, mapToField.Name))
 				}
 
 				i, err := strconv.Atoi(value)
@@ -116,7 +117,7 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 					return err
 				}
 				if i < 0 {
-					return errOnlyPositiveInt
+					return errors.New(fmt.Sprintf(onlyPositiveInt, value, mapToField.Name))
 				}
 				mapToValue.SetUint(uint64(i))
 			case reflect.Bool:
