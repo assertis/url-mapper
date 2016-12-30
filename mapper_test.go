@@ -34,3 +34,33 @@ func TestMappingStrings(t *testing.T) {
 	assert.Equal(t, rtnDate, r.ReturnDate)
 	assert.Equal(t, 1, r.NumOfPassengers)
 }
+
+func TestIncorrectInt(t *testing.T) {
+	var r = TestRequest{}
+
+	values, err := url.ParseQuery("o=TBW&d=LBG&pax=X&outward_date=1482852746")
+	assert.Nil(t, err)
+
+	err = mapper.Unmarshal(values, &r)
+	assert.NotNil(t, err)
+}
+
+func TestIncorrectUnixTime(t *testing.T) {
+	var r = TestRequest{}
+
+	values, err := url.ParseQuery("o=TBW&d=LBG&pax=1&outward_date=X")
+	assert.Nil(t, err)
+
+	err = mapper.Unmarshal(values, &r)
+	assert.NotNil(t, err)
+}
+
+func TestIncorrectRFC3339Time(t *testing.T) {
+	var r = TestRequest{}
+
+	values, err := url.ParseQuery("o=TBW&d=LBG&pax=1&outward_date=1482852746&return_date=2016-12-31")
+	assert.Nil(t, err)
+
+	err = mapper.Unmarshal(values, &r)
+	assert.NotNil(t, err)
+}
