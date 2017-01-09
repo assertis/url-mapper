@@ -16,7 +16,7 @@ package mapper
 import (
 	"errors"
 	"fmt"
-	"github.com/yezooz/govalidator"
+	"github.com/asaskevich/govalidator"
 	"net/url"
 	"reflect"
 	"strconv"
