@@ -72,12 +72,12 @@ func mapToStruct(values url.Values, v reflect.Value) error {
 		if mapToValue.IsValid() && mapToValue.CanSet() {
 			value := values.Get(name)
 
+			if values.Get(name) == "" {
+				continue
+			}
+
 			// Time?
 			if mapToValue.Type() == reflect.TypeOf(time.Time{}) {
-				if values.Get(name) == "" {
-					continue
-				}
-
 				if opts.Contains("rfc3339") && govalidator.IsRFC3339(value) {
 					t, err := time.Parse(time.RFC3339, value)
 					if err != nil {
